@@ -1,0 +1,4 @@
+node_modules
+.env
+authRoutes.test.js
+test

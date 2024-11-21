@@ -1,0 +1,69 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f8f9fa;
+  --foreground: #343a40;
+  --input: #d3d3d3;
+  --ring: #e9ecef;
+  --chart-1: #ffc0cb;
+  --chart-2: #ffb6c1;
+  --chart-3: #ff7f50;
+  --chart-4: #ff6347;
+  --chart-5: #ff1493;
+}
+
+body {
+  /* font-family: 'Poppins', sans-serif; */
+  /* background: linear-gradient(
+    90deg,
+    rgba(10, 15, 27, 1) 0%,
+    rgba(17, 24, 36, 1) 29%,
+    rgba(24, 32, 45, 1) 59%
+  );
+  backdrop-filter: blur(5px); */
+}
+
+
+.bg_gradient {
+  background: rgb(10, 15, 27);
+  background: linear-gradient(
+    90deg,
+    rgba(10, 15, 27, 1) 0%,
+    rgba(17, 24, 36, 1) 29%,
+    rgba(24, 32, 45, 1) 59%
+  );
+}
+.bg_blur {
+  backdrop-filter: blur(5px); /* 5px is the blur radius */
+}
+.f_robota{
+  font-family: "Roboto", sans-serif;
+}
+.f_montserrat {
+  font-family: "Montserrat", sans-serif;
+}
+.f_poppins {
+  font-family: "Poppins", sans-serif;
+}
+.header_B {
+  border-bottom: 1px solid rgb(10, 15, 27);
+}
+.h1_C{
+  font-size: 2.5rem;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: #86a2bc;
+}
+.B_order {
+  border: 1px solid rgb(10, 15, 27);
+}
+.Active_Link{
+  color: var(--input);
+  text-decoration: none;
+  transition: color 0.3s ease-in-out;
+}

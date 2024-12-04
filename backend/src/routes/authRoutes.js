@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login, logout, isloggedIn } from '../controllers/authController.js';
+import { register, login, updateUserProfile, logout, isloggedIn, userProfile, getUsers } from '../controllers/authController.js';
 import { validateRegister, validateLogin } from '../middlewares/validateRequest.js';
 import { protect, authorize } from '../middlewares/authMiddleware.js';
 
@@ -45,7 +45,10 @@ const router = express.Router();
  */
 router.post('/register', validateRegister, register);
 router.post('/login', validateLogin, login);
+router.get('/get-all-users',  getUsers);
+router.put('/update-profile', protect,  authorize('user', 'admin'), updateUserProfile);
 router.post('/isLogin/:token', isloggedIn);
+router.get('/profile/:user', protect, authorize('user', 'admin'), userProfile);
 router.get('/logout', logout);
 
 

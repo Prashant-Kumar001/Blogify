@@ -8,6 +8,14 @@ const userSchema = new mongoose.Schema(
       required: [true, "Please add a username"],
       unique: true,
       trim: true,
+      // lowercase: true,
+      index: true,
+    },
+    profileBio: {
+      type: String,
+      default: null,
+      minlength: [1, "Bio cannot be empty"],
+      maxlength: [500, "Bio cannot exceed 500 characters"],
     },
     email: {
       type: String,
@@ -41,6 +49,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["user", "admin"],
       default: "user",
+    },
+    following: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "User",
+    },
+    followers: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "User",
     },
     Blogs: [
       {

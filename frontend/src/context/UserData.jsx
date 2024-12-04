@@ -11,7 +11,9 @@ export const UserDataProvider = ({ children }) => {
   const [userData, setUserData] = useState({
     email: '',
     username: '',
-    role: ''
+    role: '',
+    profile: '',
+    id: '',
   });
 
   // Function to update user data
@@ -26,7 +28,9 @@ export const UserDataProvider = ({ children }) => {
     setUserData({
       email: '',
       username: '',
-      role: ''
+      role: '',
+      profile: '',
+      id: '',
     });
   };
 

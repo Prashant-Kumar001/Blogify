@@ -60,7 +60,6 @@ export const register = asyncHandler(async (req, res) => {
 // @access  Public
 export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  console.log(email, password);
 
   // Check for user email and verify password
   const user = await User.findOne({ email }).select("+password");
@@ -89,6 +88,46 @@ export const login = asyncHandler(async (req, res) => {
   } else {
     return ResponseHandler.unauthorized(res, "Invalid email or password");
   }
+});
+
+//desc      get current user profile
+//route     GET /api/auth/profile
+//access    public
+export const userProfile = asyncHandler(async (req, res) => {
+  const userName = req.params.user;
+  const user = await User.findOne({ 
+    username: userName }).populate({
+      path: "following",
+      select: "username",
+    })
+  if (user) {
+    ResponseHandler.success(
+      res,
+      user,
+      "get user successfully"
+    );
+  } else {
+    return ResponseHandler.notFound(res, "User not found");
+  }
+});
+
+//desc      update user profile
+//route     PUT /api/auth/update-profile
+//access    public
+export const updateUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    return ResponseHandler.notFound(res, "User not found");
+  }
+  const { avatar, bio, username } = req.body;
+  if (!avatar || !bio || !username) {
+    return ResponseHandler.badRequest(res, "Missing required fields");
+  }
+  user.profile_picture = avatar;
+  user.profile_bio = bio;
+  user.profile_name = username;
+  await user.save();
+  ResponseHandler.success(res, user, "User profile updated successfully");
 });
 
 // @desc    Authenticate a user
@@ -122,6 +161,30 @@ export const getAllUsers = asyncHandler(async (req, res) => {
     ResponseHandler.serverError(res, "Failed to fetch users");
   }
 });
+// @desc    Authenticate a user
+// @route   POST /api/auth/admin/get-all-users
+// @access  initial call public
+export const getUsers = asyncHandler(async (req, res) => {
+  const users = await User.find({}).select({
+    username: 1,
+    email: 1,
+    profile_picture: 1,
+  });
+  if (users) {
+    ResponseHandler.success(
+      res,
+      {
+        users,
+        totalUsers: users.length,
+        success: true,
+        message: "All users fetched successfully",
+      },
+      "All users fetched successfully"
+    );
+  } else {
+    ResponseHandler.serverError(res, "Failed to fetch users");
+  }
+});
 
 // @desc    Authenticate a user
 // @route   POST /api/auth/admin/delete-user
@@ -129,6 +192,7 @@ export const getAllUsers = asyncHandler(async (req, res) => {
 
 export const isloggedIn = asyncHandler(async (req, res) => {
   const token = req.params.token;
+  
   const { id } = verifyToken(token);
 
   if (!id) {
@@ -143,8 +207,11 @@ export const isloggedIn = asyncHandler(async (req, res) => {
           id: user._id,
           username: user.username,
           email: user.email,
-          img: user.img || 'unknown',
-          role: user.role
+          img: user.
+            profile_picture,
+          role: user.role,
+          following: user.following,
+          followers: user.followers,
         },
         success: true,
         message: "User is logged in",

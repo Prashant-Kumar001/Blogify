@@ -8,8 +8,10 @@ import mongoose from "mongoose";
 // Create a comment
 export const createComment = asyncHandler(async (req, res) => {
     const { blogId } = req.params; // Get blogId from URL params
-    const { content } = req.body; // Get the content of the comment from the request body
+    const { comment } = req.body; // Get the content of the comment from the request body
     const userId = req.user._id; // Assuming you use authentication middleware to get the logged-in user
+    console.log(req.body); //
+
 
 
     // Check if the blog exists
@@ -20,7 +22,7 @@ export const createComment = asyncHandler(async (req, res) => {
 
     // Create the new comment
     const newComment = await Comment.create({
-        content,
+        content: comment,
         user: userId, // Associate the comment with the logged-in user
         blog: blogId, // Associate the comment with the blog
     });

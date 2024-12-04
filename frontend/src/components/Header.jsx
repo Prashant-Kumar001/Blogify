@@ -37,14 +37,15 @@ const Header = () => {
                 <div className="avatar">
                   <div className="ring-primary ring-offset-base-100 w-6 rounded-full ring ring-offset-2">
                     <img
-                      src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                      src={
+                        `${userData?.profile || "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" }`}
                       alt="User Avatar"
                     />
                   </div>
                 </div>
                 <ul className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
                   <li>
-                    <NavLink to="/profile">Profile</NavLink>
+                    <NavLink to={`/profile/${userData?.username}`}>Profile</NavLink>
                   </li>
                   <li>
                     <NavLink to="/account">Account</NavLink>
@@ -69,15 +70,13 @@ const Header = () => {
                       </button>
                     </li>
                   )}
-                    {
-                    userData?.role == 'admin' && (
-                      <li>
-                        <span className="text-gray-200 font-semibold">
-                          {userData?.role}
-                        </span>
-                      </li>
-                    )
-                  }
+                  {userData?.role == "admin" && (
+                    <li>
+                      <span className="text-gray-200 font-semibold">
+                        {userData?.role}
+                      </span>
+                    </li>
+                  )}
                 </ul>
               </div>
             </div>
@@ -91,9 +90,7 @@ const Header = () => {
               to="/"
               className={({ isActive }) =>
                 `hover:underline ${
-                  isActive
-                    ? "font-semibold underline text-blue-600"
-                    : ""
+                  isActive ? "font-semibold underline text-blue-600" : ""
                 }`
               }
             >
@@ -105,9 +102,7 @@ const Header = () => {
               to="/blog"
               className={({ isActive }) =>
                 `hover:underline ${
-                  isActive
-                    ? "font-semibold underline text-blue-600"
-                    : ""
+                  isActive ? "font-semibold underline text-blue-600" : ""
                 }`
               }
             >
@@ -119,9 +114,7 @@ const Header = () => {
               to="/about"
               className={({ isActive }) =>
                 `hover:underline ${
-                  isActive
-                    ? "font-semibold underline text-blue-600"
-                    : ""
+                  isActive ? "font-semibold underline text-blue-600" : ""
                 }`
               }
             >
@@ -133,9 +126,7 @@ const Header = () => {
               to="/contact"
               className={({ isActive }) =>
                 `hover:underline ${
-                  isActive
-                    ? "font-semibold underline text-blue-600"
-                    : ""
+                  isActive ? "font-semibold underline text-blue-600" : ""
                 }`
               }
             >

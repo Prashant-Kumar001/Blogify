@@ -7,10 +7,9 @@ import User from "../models/Users.model.js";
 // @route   POST /api/Blogs
 // @access  Private
 export const createBlog = asyncHandler(async (req, res) => {
-  const { title, description, videoUrl = null, thumbnailUrl} = req.body;
-
+  const { title, description, videoUrl = null, thumbnailUrl, category } = req.body;
   // Validate the input data
-  if (!title ||!description) {
+  if (!title || !description || !category || !thumbnailUrl) {
     return ResponseHandler.badRequest(
       res,
       "Invalid input data",
@@ -25,6 +24,7 @@ export const createBlog = asyncHandler(async (req, res) => {
     description,
     videoUrl,
     thumbnailUrl,
+    category: category,
     user: req.user._id,
   });
 
@@ -270,8 +270,17 @@ export const getAllBlogs = asyncHandler(async (req, res) => {
 export const getBlog = asyncHandler(async (req, res) => {
   const userBlog = await Blog.findById(req.params.id).populate(
     "user",
-    "username email"
-  );
+    "username email",
+  ).populate({
+    path: "likes",
+  }).populate({
+    path: "comments",
+    select: "content createdAt",
+    populate: {
+      path: "user",
+      select: "username profile_picture _id createdAt ",
+    },
+  })
 
   if (!userBlog) {
     res.status(404);

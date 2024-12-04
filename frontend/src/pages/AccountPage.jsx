@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-
+import { useUserData } from "../context/UserData";
 const AccountPage = () => {
+    const { userData } = useUserData(); // Access userData and logout function from context
     const [user, setUser] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [newUserData, setNewUserData] = useState({
@@ -20,9 +21,9 @@ const AccountPage = () => {
     // Simulate an API call to get user data
     useEffect(() => {
         const fetchedUserData = {
-            name: 'John Doe',
-            email: 'john.doe@example.com',
-            avatar: 'https://i.pravatar.cc/150?img=5',
+            name: userData.username,
+            email: userData.email,
+            avatar: userData.profile,
             notificationsEnabled: true,
         };
 

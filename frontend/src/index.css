@@ -67,3 +67,19 @@ body {
   text-decoration: none;
   transition: color 0.3s ease-in-out;
 }
+
+
+.skeleton1 {
+  background: linear-gradient(-90deg, #333333 25%, #555555 50%, #777777 75%);
+  background-size: 400% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}

@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Layout from './components/Layout';
 import Loader from './components/Loader';
 import RedirectLoader from './components/RedirectLoader';
+import ScrollToTop from './components/ScrollToTop';
 
 import axios from 'axios';
 
@@ -90,7 +91,7 @@ const router = createBrowserRouter(
           ),
         },
         {
-          path: "/profile",
+          path: "/profile/:userid",
           element: (
             <Suspense fallback={<Loader />}>
               <Profile />
@@ -130,7 +131,7 @@ const router = createBrowserRouter(
           ),
         },
         {
-          path: "/dashboard/blog/:blogId",
+          path: "/blog/:blogId",
           element: (
             <Suspense fallback={<Loader />}>
               <FullPost />
@@ -167,14 +168,15 @@ const App = () => {
     if (token) {
       // reqUserInfo(token);
       fetchIsLogin(token).then((data) => {
-        if(data.success == false) {
-          alert('This app is not working at the moment so come back later')
-        }
         if (data) {
           updateUserData({
             email: data?.data?.user?.email,
             username: data?.data?.user?.username,
-            role: data?.data?.user?.role
+            role: data?.data?.user?.role,
+            profile: data?.data?.user?.img,
+            id: data?.data?.user?.id,
+            following: data?.data?.user?.following,
+            followers: data?.data?.user?.followers
           });
         }
       }).catch((error) => {
@@ -195,10 +197,14 @@ const App = () => {
 
 
 
-  return <RouterProvider
+  return <>
+  <RouterProvider
     future={{
       v7_startTransition: true,
-    }} router={router} />;
+    }}
+    router={router}
+  />
+</>
 };
 
 export default App;

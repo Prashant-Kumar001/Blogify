@@ -22,7 +22,7 @@ router
 
 router
   .route("/:id")
-  .get(protect, getBlog)
+  .get( getBlog)
   .put(protect, authorize("user", "admin"), updateBlog)
   .delete(protect, authorize("admin"), deleteBlog);
 

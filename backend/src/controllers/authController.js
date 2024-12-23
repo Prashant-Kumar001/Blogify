@@ -95,17 +95,16 @@ export const login = asyncHandler(async (req, res) => {
 //access    public
 export const userProfile = asyncHandler(async (req, res) => {
   const userName = req.params.user;
-  const user = await User.findOne({ 
-    username: userName }).populate({
-      path: "following",
-      select: "username",
-    })
+  const user = await User.findOne({
+    username: userName,
+  }).populate({
+    path: "following",
+    select: "username",
+  }).populate({
+    path: 'Blogs'
+  })
   if (user) {
-    ResponseHandler.success(
-      res,
-      user,
-      "get user successfully"
-    );
+    ResponseHandler.success(res, user, "get user successfully");
   } else {
     return ResponseHandler.notFound(res, "User not found");
   }
@@ -142,10 +141,16 @@ export const logout = asyncHandler(async (req, res) => {
 // @route   POST /api/auth/admin/get-all-users
 // @access  private
 export const getAllUsers = asyncHandler(async (req, res) => {
-  const users = await User.find({}).populate({
-    path: "Blogs",
-    populate: { path: "comments" },
-  });
+  const users = await User.find({})
+  console.log(req.user);
+  if(!req.user){
+    return ResponseHandler.unauthorized(res, "Not authorized as admin");
+  }
+  if(req.user.role!=='admin'){
+    return ResponseHandler.unauthorized(res, "Not authorized as admin");
+  }
+   
+  
   if (users) {
     ResponseHandler.success(
       res,
@@ -191,43 +196,54 @@ export const getUsers = asyncHandler(async (req, res) => {
 // @access  public [ runs when app loaded]
 
 export const isloggedIn = asyncHandler(async (req, res) => {
-  const token = req.params.token;
-  
-  const { id } = verifyToken(token);
+  try {
+    const token = req.params.token;
 
-  if (!id) {
-    return ResponseHandler.unauthorized(res, "login");
-  }
-  const user = await User.findById(id);
-  if (user) {
-    ResponseHandler.success(
-      res,
-      {
-        user: {
-          id: user._id,
-          username: user.username,
-          email: user.email,
-          img: user.
-            profile_picture,
-          role: user.role,
-          following: user.following,
-          followers: user.followers,
+    // Verify the token
+    const decoded = verifyToken(token);
+
+    // If `verifyToken` returns nothing or is invalid
+    if (!decoded || !decoded.id) {
+      return ResponseHandler.unauthorized(
+        res,
+        "Invalid or expired token. Please login again."
+      );
+    }
+
+    const user = await User.findById(decoded.id);
+
+    if (user) {
+      ResponseHandler.success(
+        res,
+        {
+          user: {
+            id: user._id,
+            username: user.username,
+            email: user.email,
+            img: user.profile_picture,
+            role: user.role,
+            following: user.following,
+            followers: user.followers,
+          },
+          success: true,
+          message: "User is logged in",
         },
-        success: true,
-        message: "User is logged in",
-      },
-      "User is logged in"
-    );
-  } else {
-    ResponseHandler.success(
-      res,
-      {
-        user: null,
-        success: false,
-        message: "User is not logged in",
-      },
-      "User is not logged in"
-    );
+        "User is logged in"
+      );
+    } else {
+      ResponseHandler.success(
+        res,
+        {
+          user: null,
+          success: false,
+          message: "User not found. Please login again.",
+        },
+        "User not found"
+      );
+    }
+  } catch (error) {
+    console.error("Error verifying token or fetching user:", error);
+    ResponseHandler.error(res, "An error occurred. Please try again.");
   }
 });
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import Loader from "../components/Loader";
 import skeleton from "../components/Skeleton";
 import CryptoJS from "crypto-js";
-
+import parse from "html-react-parser";
 // Function to generate a hash
 const encrypt = (text, key) => {
   return CryptoJS.AES.encrypt(text, key).toString();
@@ -43,13 +43,16 @@ const fetchPosts = async () => {
 };
 
 const Dashboard = () => {
+  const [token, setToken] = useState(localStorage.getItem("token"));
+
+
   const {
     data: posts, // Query data (list of posts)
     isLoading, // Loading state
     isError, // Error state
     error, // Error details
   } = useQuery({
-    queryKey: ["posts"], // Unique key for the query
+    queryKey: ["posts", token], // Unique key for the query
     queryFn: fetchPosts, // Function to fetch data
     onError: (err) => {
       if (err.message === "You need to login!") {
@@ -59,7 +62,7 @@ const Dashboard = () => {
         toast.error("Failed to load posts. Please try again.");
       }
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    // staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   if (isLoading) {
@@ -98,12 +101,14 @@ const Dashboard = () => {
                     className="mt-4 mb-2 w-full h-32 object-cover rounded-lg"
                   />
                 )}
-                <h3 className="text-xl font-semibold f_robota">{post.title.substring(0, 15)}...</h3>
-                <p className="text-sm mt-2 h-11">
-                  {post.description.substring(0, 50)}...
-                </p>
+                <h3 className="text-xl font-semibold f_robota">{parse(post?.title?.substring(0, 15))}...</h3>
+                  <div
+                  dangerouslySetInnerHTML={{
+                    __html: parse(post?.description.substring(0, 80)),
+                  }}
+                  />
                 <Link
-                  to={`/dashboard/blog/${slug}-${encodedEncryptedBlogId}`} // Combine slug and hashed ID
+                  to={`/blog/${slug}-${encodedEncryptedBlogId}`} // Combine slug and hashed ID
                   className="btn btn-outline mt-4 w-full sticky bottom-1"
                 >
                   Read More

@@ -4,8 +4,10 @@ import Layout from './components/Layout';
 import Loader from './components/Loader';
 import RedirectLoader from './components/RedirectLoader';
 import ScrollToTop from './components/ScrollToTop';
-
+import LoadingBar from './components/loadingBar';
+import TinyMCEForm from './components/TinyMCEForm';
 import axios from 'axios';
+import ErrorBoundary from './components/ErrorBoundary';
 
 
 // Lazy load pages for better performance
@@ -15,17 +17,34 @@ const Post = lazy(() => import('./pages/Post'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const Contact = lazy(() => import('./pages/Contact'));
-const About = lazy(() => import('./pages/About'));
+
+
 const Profile = lazy(() => import('./pages/Profile'));
 const Account = lazy(() => import('./pages/AccountPage'));
 const Setting = lazy(() => import('./pages/SettingsPage'));
 const CreateBlog = lazy(() => import('./pages/CreateBlog'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const FullPost = lazy(() => import('./components/FullPost'));
+const Admin = lazy(() => import('./pages/Admin'));
+const About = lazy(() => import('./pages/About'));
+import 'nprogress/nprogress.css';
+
+// const Home = lazy(() =>
+//   new Promise((resolve) => {
+//     setTimeout(() => resolve(import('./pages/Home')), 1000);
+//   })
+// );
+
+// const About = lazy(() =>
+//   new Promise((resolve) => {
+//     setTimeout(() => resolve(import('./pages/About')), 1000);
+//   })
+// );
 
 // checking when app is loaded 
 import { fetchIsLogin } from './api/userAuth';
 import { useUserData } from './context/UserData';
+import ErrorPage from './pages/ErrorPage';
 
 // Create router with all the future flags enabled
 const router = createBrowserRouter(
@@ -34,6 +53,14 @@ const router = createBrowserRouter(
       path: "/",
       element: <Layout />,
       children: [
+        {
+          path: "/admin",
+          element: (
+            <Suspense fallback={<RedirectLoader />}>
+              <Admin />
+            </Suspense>
+          ),
+        },
         {
           path: "/",
           element: (
@@ -44,6 +71,14 @@ const router = createBrowserRouter(
         },
         {
           path: "/blog",
+          element: (
+            <Suspense fallback={<RedirectLoader />}>
+              <Blog />
+            </Suspense>
+          ),
+        },
+        {
+          path: "/blog/category/:category",
           element: (
             <Suspense fallback={<RedirectLoader />}>
               <Blog />
@@ -137,6 +172,14 @@ const router = createBrowserRouter(
               <FullPost />
             </Suspense>
           ),
+        },
+        {
+          path: "*",
+          element: (
+            <Suspense fallback={<Loader />}>
+              <ErrorPage />
+            </Suspense>
+          ),
         }
       ],
     },
@@ -185,26 +228,17 @@ const App = () => {
     }
   }, [],)
 
-  // const reqUserInfo = async (token) => {
-  //   const res = await axios.post(`http://localhost:8000/api/auth/isLogin/${token}`)
-  //   if (res.status === 200) {
-  //     updateUserData({
-  //       email: res.data.data.user.email,
-  //       username: res.data.data.user.username
-  //     });
-  //   }
-  // }
-
-
 
   return <>
-  <RouterProvider
-    future={{
-      v7_startTransition: true,
-    }}
-    router={router}
-  />
-</>
+    <ErrorBoundary>
+      <RouterProvider
+        future={{
+          v7_startTransition: true,
+        }}
+        router={router}
+      />
+    </ErrorBoundary>
+  </>
 };
 
 export default App;

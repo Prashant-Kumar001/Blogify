@@ -96,12 +96,12 @@ const Register = () => {
   return (
     <div className="flex card items-center justify-center min-h-screen shrink-0 shadow-2xl B_order">
       <div className="w-full max-w-md p-8 space-y-4 rounded-md shadow-lg B_order">
-        <h2 className="text-2xl font-semibold text-center text-gray-200">Sign Up</h2>
+        <h2 className="text-2xl font-semibold text-center ">Sign Up</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Username */}
           <div>
-            <label htmlFor="username" className="block text-gray-300">Username</label>
+            <label htmlFor="username" className="block ">Username</label>
             <input
               type="text"
               name="username"
@@ -115,7 +115,7 @@ const Register = () => {
 
           {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-gray-300">Email</label>
+            <label htmlFor="email" className="block ">Email</label>
             <input
               type="email"
               name="email"
@@ -129,7 +129,7 @@ const Register = () => {
 
           {/* Password */}
           <div>
-            <label htmlFor="password" className="block text-gray-300">Password</label>
+            <label htmlFor="password" className="block">Password</label>
             <input
               type="password"
               name="password"
@@ -145,7 +145,7 @@ const Register = () => {
           <div>
             <button
               type="submit"
-              className="w-full py-2 btn text-white bg-blue-600 rounded-md hover:bg-blue-700"
+              className="w-full py-2 btn  bg-blue-600 rounded-md hover:bg-blue-700"
               disabled={loading} // Disable the button during loading
             >
               {loading ? 'Signing Up...' : 'Sign Up'}
@@ -157,7 +157,7 @@ const Register = () => {
         </form>
 
         {/* Redirect to Login */}
-        <p className="text-center text-gray-600">
+        <p className="text-center ">
           Already have an account?{" "}
           <NavLink to="/login" className="text-blue-600 hover:underline">Login</NavLink>
         </p>

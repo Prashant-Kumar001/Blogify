@@ -55,8 +55,10 @@ const Login = () => {
     } catch (error) {
       setErrors({});
       console.log(error);
-      setApiError(error?.response?.data?.message || "An error occurred");
-      toast.error(error.response?.data?.message || "Login failed");
+      setTimeout(() => {
+        setApiError(error?.response?.data?.message || "An error occurred");
+        toast.error(error.response?.data?.message || "Login failed");
+      }, 2000);
     } finally {
       setTimeout(() => {
         isLoading(false);
@@ -78,14 +80,14 @@ const Login = () => {
   return (
     <div className="flex items-center justify-center min-h-screen ">
       <div className="w-full max-w-md p-8  rounded-md shadow-lg  duration-300 B_order">
-        <h2 className="text-3xl font-bold text-center text-gray-300 mb-6 animate-fadeInDown">
+        <h2 className="text-3xl font-bold text-center  mb-6 animate-fadeInDown">
           Login
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4 animate-fadeInUp">
           {/* Email Input */}
           <div className="animate-fadeIn delay-75">
-            <label htmlFor="email" className="block text-gray-200">
+            <label htmlFor="email" className="block ">
               Email
             </label>
             <input
@@ -103,7 +105,7 @@ const Login = () => {
 
           {/* Password Input */}
           <div className="animate-fadeIn delay-150">
-            <label htmlFor="password" className="block text-gray-200">
+            <label htmlFor="password" className="block ">
               Password
             </label>
             <input
@@ -123,7 +125,7 @@ const Login = () => {
           <div>
             <button
               type="submit"
-              className="w-full py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-transform transform hover:scale-105 duration-300"
+              className="w-full py-2  bg-blue-600 rounded-md hover:bg-blue-700 transition-transform transform hover:scale-105 duration-300"
             >
               Login
             </button>
@@ -138,7 +140,7 @@ const Login = () => {
         </form>
 
         {/* Redirect to Signup */}
-        <p className="text-center text-gray-200 mt-4">
+        <p className="text-center  mt-4">
           Don't have an account?{" "}
           <NavLink to="/register" className="text-blue-600 hover:underline">
             Sign Up

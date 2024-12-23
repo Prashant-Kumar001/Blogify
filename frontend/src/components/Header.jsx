@@ -3,8 +3,10 @@ import { NavLink, useLocation } from "react-router-dom";
 import { IoCreateSharp } from "react-icons/io5";
 import { useUserData } from "../context/UserData";
 import RedirectLoader from "./RedirectLoader";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
+  const navigate = useNavigate();
   const { userData, clearUserData } = useUserData(); // Access userData and logout function from context
   const [isMenuOpen, setIsMenuOpen] = useState(false); // Controls mobile menu visibility
   const [loading, isLoading] = useState(false);
@@ -19,6 +21,11 @@ const Header = () => {
       isLoading(false); // Hide loading spinner after 2 seconds
     }, 2000);
   };
+
+  useEffect(() => {
+    // Close mobile menu when location changes
+    setIsMenuOpen(false);
+  }, [navigate]);
 
   return (
     <header className="sticky top-0 z-50 p-4 bg_blur shadow-md">
@@ -38,18 +45,28 @@ const Header = () => {
                   <div className="ring-primary ring-offset-base-100 w-6 rounded-full ring ring-offset-2">
                     <img
                       src={
-                        `${userData?.profile || "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" }`}
+                        `${userData?.profile || "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"}`}
                       alt="User Avatar"
                     />
                   </div>
                 </div>
                 <ul className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-                  <li>
-                    <NavLink to={`/profile/${userData?.username}`}>Profile</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/account">Account</NavLink>
-                  </li>
+
+                  {
+                    userData?.username && (
+                      <>
+                        <li>
+                          <NavLink to={`/profile/${userData?.username}`}>Profile</NavLink>
+                        </li>
+                        <li>
+                          <NavLink to="/account">Account</NavLink>
+                        </li>
+                        <li>
+                          <NavLink to="/dashboard/blog">Dashboard</NavLink>
+                        </li>
+                      </>
+                    )
+                  }
                   <li>
                     <NavLink to="/setting">Setting</NavLink>
                   </li>
@@ -73,7 +90,7 @@ const Header = () => {
                   {userData?.role == "admin" && (
                     <li>
                       <span className="text-gray-200 font-semibold">
-                        {userData?.role}
+                        <NavLink to={"/admin"}>{userData?.role}</NavLink>
                       </span>
                     </li>
                   )}
@@ -89,8 +106,7 @@ const Header = () => {
             <NavLink
               to="/"
               className={({ isActive }) =>
-                `hover:underline ${
-                  isActive ? "font-semibold underline text-blue-600" : ""
+                `hover:underline ${isActive ? "font-semibold underline text-blue-600" : ""
                 }`
               }
             >
@@ -101,8 +117,7 @@ const Header = () => {
             <NavLink
               to="/blog"
               className={({ isActive }) =>
-                `hover:underline ${
-                  isActive ? "font-semibold underline text-blue-600" : ""
+                `hover:underline ${isActive ? "font-semibold underline text-blue-600" : ""
                 }`
               }
             >
@@ -113,8 +128,7 @@ const Header = () => {
             <NavLink
               to="/about"
               className={({ isActive }) =>
-                `hover:underline ${
-                  isActive ? "font-semibold underline text-blue-600" : ""
+                `hover:underline ${isActive ? "font-semibold underline text-blue-600" : ""
                 }`
               }
             >
@@ -125,8 +139,7 @@ const Header = () => {
             <NavLink
               to="/contact"
               className={({ isActive }) =>
-                `hover:underline ${
-                  isActive ? "font-semibold underline text-blue-600" : ""
+                `hover:underline ${isActive ? "font-semibold underline text-blue-600" : ""
                 }`
               }
             >
@@ -206,10 +219,9 @@ const Header = () => {
             to="/"
             onClick={toggleMenu}
             className={({ isActive }) =>
-              `hover:underline ${
-                isActive
-                  ? "font-semibold underline text-blue-600"
-                  : "text-gray-700"
+              `hover:underline ${isActive
+                ? "font-semibold underline text-blue-600"
+                : "text-gray-700"
               }`
             }
           >
@@ -219,10 +231,9 @@ const Header = () => {
             to="/blog"
             onClick={toggleMenu}
             className={({ isActive }) =>
-              `hover:underline ${
-                isActive
-                  ? "font-semibold underline text-blue-600"
-                  : "text-gray-700"
+              `hover:underline ${isActive
+                ? "font-semibold underline text-blue-600"
+                : "text-gray-700"
               }`
             }
           >

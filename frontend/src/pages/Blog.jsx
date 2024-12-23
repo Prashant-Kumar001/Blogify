@@ -1,9 +1,13 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios"; // Import Axios
 import RedirectLoader from "../components/RedirectLoader";
-import CryptoJS from "crypto-js"; // Don't forget to import CryptoJS
+import CryptoJS from "crypto-js"; // Import CryptoJS
+import parse from "html-react-parser";
+import { RiHome5Fill } from "react-icons/ri";
+import { RiBloggerFill } from "react-icons/ri";
 
 // Function to encrypt text
 const encrypt = (text, key) => {
@@ -16,11 +20,7 @@ const urlEncode = (str) => {
 };
 
 // Slugify function to generate a valid URL slug
-const slugify = (text) =>
-  text
-    ?.toString()
-    ?.trim()
-    .replace(/\s+/g, "-"); // Replace spaces with dashes
+const slugify = (text) => text?.toString()?.trim().replace(/\s+/g, "-"); // Replace spaces with dashes
 
 // Helper function to truncate text
 const truncateText = (text, maxLength) => {
@@ -32,7 +32,9 @@ const truncateText = (text, maxLength) => {
 
 // API call to fetch blogs using Axios
 const fetchBlogs = async () => {
-  const response = await axios.get("http://localhost:8000/api/blogs/users/blogs");
+  const response = await axios.get(
+    "http://localhost:8000/api/blogs/users/blogs"
+  );
   if (response.data?.success) {
     return response.data.data.blogs; // Extract blogs from the response
   } else {
@@ -41,13 +43,26 @@ const fetchBlogs = async () => {
 };
 
 const BlogLayout = () => {
+  const { category } = useParams();
+
   // Use React Query to fetch blogs
-  const { data: blogs = [], isLoading, isError, error, refetch } = useQuery({
-    queryKey: ["blogs"], // Query key
-    queryFn: fetchBlogs, // Fetch function
-    refetchOnWindowFocus: true, // Automatically refetch when the user focuses back on the window
+  const {
+    data: blogs = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["posts"], // Unique key for the query
+    queryFn: fetchBlogs, // Function to fetch data
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
+
+  const Categories = [...new Set(blogs.map((blog) => blog.category))];
+
+  // Filter blogs based on category
+  const filteredBlogs = category
+    ? blogs.filter((blog) => blog.category === category)
+    : blogs;
 
   // Mock Data for Trending and Interests
   const trending = [
@@ -65,6 +80,7 @@ const BlogLayout = () => {
     "Technology",
     "Finances",
     "Travel",
+    "health",
   ];
 
   // Handle loading state
@@ -78,11 +94,13 @@ const BlogLayout = () => {
 
   // Handle error state
   if (isError) {
-    return <div className="text-center text-red-500">Error: {error.message}</div>;
+    return (
+      <div className="text-center text-red-500">Error: {error.message}</div>
+    );
   }
 
   // If no blogs are found
-  if (blogs.length === 0) {
+  if (filteredBlogs.length === 0) {
     return (
       <div className="text-center">
         No blogs found. Please check back later.
@@ -92,17 +110,22 @@ const BlogLayout = () => {
 
   return (
     <div className="container mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-10">
-      {/* Blog List Section */}
-      <div className="lg:col-span-2 space-y-8">
-        {blogs.map((blog) => {
+        <div className="lg:col-span-2 space-y-8">
+          <div className="breadcrumbs text-sm">
+            <ul>
+          <li><NavLink to="/"> <RiHome5Fill className="mr-2" /> Home</NavLink></li>
+          <li><NavLink to="/documents"> <RiBloggerFill className="mr-2" /> post</NavLink></li>
+            </ul>
+          </div>
+          {filteredBlogs.map((blog) => {
           // Encrypt and encode the blog ID
-          const blogHashedId = encrypt(blog._id, "my-secret-key"); // Securely hash the ID
+          const blogHashedId = encrypt(blog?._id, "my-secret-key"); // Securely hash the ID
           const encodedEncryptedBlogId = urlEncode(blogHashedId);
-          const postSlug = slugify(blog.title); // Generate slug for the title
+          const postSlug = slugify(blog?.title); // Generate slug for the title
 
           return (
             <div
-              key={blog._id}
+              key={blog?._id}
               className="flex items-start gap-4 p-4 border-gray-200"
             >
               <div className="flex-1">
@@ -133,12 +156,18 @@ const BlogLayout = () => {
                     {blog.title}
                   </Link>
                 </h2>
-                <p className="text-sm">{truncateText(blog.description, 150)}</p>
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: parse(truncateText(blog.description, 150)),
+                  }}
+                />
                 <div className="flex items-center space-x-4 mt-2">
                   <span className="text-xs font-medium px-2 py-1 border border-gray-300 rounded-full">
                     {blog.category || "General"}
                   </span>
-                  <span className="text-xs flex items-center">❤️ {blog.likes.length}</span>
+                  <span className="text-xs flex items-center">
+                    ❤️ {blog.likes.length}
+                  </span>
                 </div>
               </div>
               <img
@@ -157,13 +186,14 @@ const BlogLayout = () => {
         <div className="space-y-2">
           <h3 className="text-lg font-semibold">Stories from all interests</h3>
           <div className="flex flex-wrap gap-2">
-            {interests.map((tag) => (
-              <span
+            {Categories?.map((tag) => (
+              <Link
+                to={`/blog/category/${tag}`}
                 key={tag}
-                className="px-3 py-1 text-sm border border-gray-300 rounded-full"
+                className="btn btn-neutral px-3 py-1 text-sm border border-gray-300 rounded-full"
               >
                 {tag}
-              </span>
+              </Link>
             ))}
           </div>
         </div>
@@ -185,19 +215,21 @@ const BlogLayout = () => {
         <div>
           <h3 className="text-lg font-semibold">Recent Posts</h3>
           <ul className="space-y-2">
-            {blogs.slice(-3).reverse().map((blog) => (
-              <li key={blog._id} className="flex items-center text-sm">
-                <img
-                  src={blog.thumbnailUrl}
-                  alt={blog.title}
-                  className="w-10 h-10 object-cover rounded mr-3"
-                />
-                {blog.title}
-              </li>
-            ))}
+            {blogs
+              .slice(-3)
+              .reverse()
+              .map((blog) => (
+                <li key={blog?._id} className="flex items-center text-sm">
+                  <img
+                    src={blog?.thumbnailUrl}
+                    alt={blog?.title}
+                    className="w-10 h-10 object-cover rounded mr-3"
+                  />
+                  {blog?.title}
+                </li>
+              ))}
           </ul>
         </div>
-
       </div>
     </div>
   );

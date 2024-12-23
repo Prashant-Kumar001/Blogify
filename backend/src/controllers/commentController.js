@@ -35,9 +35,9 @@ export const createComment = asyncHandler(async (req, res) => {
     blog.comments.push(newComment._id);
     await blog.save();
 
-    const user = await User.findByIdAndUpdate(userId, {
-        $push: { reviews: newComment._id },
-    });
+    // const user = await User.findByIdAndUpdate(userId, {
+    //     $push: { reviews: newComment._id },
+    // });
 
     // Return the created comment
     return ResponseHandler.created(

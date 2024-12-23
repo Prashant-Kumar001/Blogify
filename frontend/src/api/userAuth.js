@@ -11,19 +11,27 @@ const fetchIsLogin = async (token) => {
     const response = await axiosInstance.post(`/api/auth/isLogin/${token}`);
     return response.data; // Return the data part of the response
   } catch (error) {
-    if (error.code === 'ERR_NETWORK') {
+    if (error.code === "ERR_NETWORK") {
       // Server responded with a status other than 2xx
-      return { success: false, message: "Server error. Please try again later." };
+      return {
+        success: false,
+        message: "Server error. Please try again later.",
+      };
     } else if (error.request) {
       // Request was made but no response received
-      return { success: false, message: "Network error. Please check your connection." };
+      return {
+        success: false,
+        message: "Network error. Please check your connection.",
+      };
     } else {
       // Other errors (e.g., request setup issues)
-      return { success: false, message: "Something went wrong. Please try again." };
+      return {
+        success: false,
+        message: "Something went wrong. Please try again.",
+      };
     }
   }
 };
-
 
 // Function to add a user blog post
 const AddUserBlog = async (token, data) => {
@@ -40,17 +48,64 @@ const AddUserBlog = async (token, data) => {
     if (error.response) {
       // Server responded with a status other than 2xx
       console.error("Server Error: ", error.response);
-      return { success: false, message: "Server error. Please try again later." };
+      return {
+        success: false,
+        message: "Server error. Please try again later.",
+      };
     } else if (error.request) {
       // No response from the server
       console.error("Network Error: ", error.request);
-      return { success: false, message: "Network error. Please check your connection." };
+      return {
+        success: false,
+        message: "Network error. Please check your connection.",
+      };
     } else {
       // Other errors
       console.error("Error: ", error.message);
-      return { success: false, message: "Something went wrong. Please try again." };
+      return {
+        success: false,
+        message: "Something went wrong. Please try again.",
+      };
     }
   }
 };
 
-export { fetchIsLogin, AddUserBlog };
+// admin handler for gating all users blog
+const fetchAllUsersBlogs = async (token) => {
+  try {
+    const response = await axiosInstance.get(`/api/admin/users/`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data; // Return the data part of the response
+  } catch (error) {
+    if (error.status === 403) {
+      return {
+        success: false,
+        message: "You are not authorized to access this resource.",
+      };
+    }
+    if (error.code === "ERR_NETWORK") {
+      // Server responded with a status other than 2xx
+      return {
+        success: false,
+        message: "Server error. Please try again later.",
+      };
+    } else if (error.request) {
+      // Request was made but no response received
+      return {
+        success: false,
+        message: "Network error. Please check your connection.",
+      };
+    } else {
+      // Other errors (e.g., request setup issues)
+      return {
+        success: false,
+        message: "Something went wrong. Please try again.",
+      };
+    }
+  }
+};
+
+export { fetchIsLogin, AddUserBlog, fetchAllUsersBlogs };

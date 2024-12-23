@@ -28,7 +28,7 @@ const addLike = async (req, res) => {
       type: type,
     });
     const user = await Blog.findOne({ _id: id });
-    user.likes.push(userId);
+    user.likes.push(newLike._id);
     await user.save(); // Save the updated user with the new blog ID in Blogs array
     await newLike.save();
 

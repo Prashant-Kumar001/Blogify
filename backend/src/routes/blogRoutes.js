@@ -24,6 +24,6 @@ router
   .route("/:id")
   .get( getBlog)
   .put(protect, authorize("user", "admin"), updateBlog)
-  .delete(protect, authorize("admin"), deleteBlog);
+  .delete(protect, deleteBlog);
 
 export default router;

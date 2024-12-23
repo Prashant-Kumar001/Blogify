@@ -140,13 +140,13 @@ const Home = () => {
           Browse Categories
         </h2>
         <div className="flex flex-wrap justify-center gap-4">
-          <Link to="/category/technology" className="btn btn-neutral">
-            Technology
+          <Link to={`/blog/category/${"tech"}`} className="btn btn-neutral">
+          tech
           </Link>
-          <Link to="/category/lifestyle" className="btn btn-neutral">
+          <Link to={`/blog/category/lifestyle`} className="btn btn-neutral">
             Lifestyle
           </Link>
-          <Link to="/category/health" className="btn btn-neutral">
+          <Link to={`/blog/category/health`} className="btn btn-neutral">
             Health
           </Link>
           {/* Add more categories as needed */}

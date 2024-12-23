@@ -2,12 +2,20 @@ import Blog from "../models/Blogs.model.js";
 import asyncHandler from "express-async-handler";
 import ResponseHandler from "../api/Response.api.js";
 import User from "../models/Users.model.js";
-
+import Like from "../models/Like.model.js";
+import Comment from "../models/Comments.model.js";
+import mongoose from "mongoose";
 // @desc    Create new Blog
 // @route   POST /api/Blogs
 // @access  Private
 export const createBlog = asyncHandler(async (req, res) => {
-  const { title, description, videoUrl = null, thumbnailUrl, category } = req.body;
+  const {
+    title,
+    description,
+    videoUrl = null,
+    thumbnailUrl,
+    category,
+  } = req.body;
   // Validate the input data
   if (!title || !description || !category || !thumbnailUrl) {
     return ResponseHandler.badRequest(
@@ -16,7 +24,6 @@ export const createBlog = asyncHandler(async (req, res) => {
       "Title, description, and thumbnailUrl are required"
     );
   }
-
 
   // Create the blog
   const User_Blog = await Blog.create({
@@ -65,143 +72,33 @@ export const createBlog = asyncHandler(async (req, res) => {
 // @route   GET /api/Blogs
 // @access  private, admin
 export const getBlogs = asyncHandler(async (req, res) => {
-  const usersWithBlogData = await User.aggregate([
-    // Lookup and embed blogs data into each user
-    {
-      $lookup: {
-        from: "blogs", // Assuming the collection for blogs is named 'blogs'
-        localField: "Blogs", // Field in User model that contains blog IDs
-        foreignField: "_id", // Field in Blog model that matches User's Blogs field
-        as: "blogsData", // The new field in output that will contain populated blogs
-      },
-    },
-    // Add fields for the blog count and only required fields of each blog
-    {
-      $addFields: {
-        blogCount: { $size: "$blogsData" }, // Count number of blogs
-        blogs: {
-          $map: {
-            input: "$blogsData",
-            as: "blog",
-            in: {
-              _id: "$$blog._id",
-              title: "$$blog.title",
-              description: "$$blog.description",
-              videoUrl: "$$blog.videoUrl",
-              thumbnailUrl: "$$blog.thumbnailUrl",
-              createdAt: "$$blog.createdAt",
-              updatedAt: "$$blog.updatedAt",
-              comments: "$$blog.comments", // Keep the comment IDs for now
-            },
-          },
+  const usersWithBlogData = await User.find({}).populate({
+    path: "Blogs",
+    populate: [
+      {
+        path: "comments",
+        select: "content",
+        populate: {
+          path: "user",
+          select: "username",
         },
       },
-    },
-    // Lookup and populate comments for each blog
-    {
-      $lookup: {
-        from: "comments", // The name of the collection that holds the comments
-        localField: "blogs.comments", // The blog's comments field, which contains an array of comment IDs
-        foreignField: "_id", // The field in the "comments" collection that corresponds to comment IDs
-        as: "populatedComments", // New field containing full comment details
-      },
-    },
-    // Add populated comments to each blog entry
-    {
-      $addFields: {
-        blogs: {
-          $map: {
-            input: "$blogs",
-            as: "blog",
-            in: {
-              _id: "$$blog._id",
-              title: "$$blog.title",
-              description: "$$blog.description",
-              videoUrl: "$$blog.videoUrl",
-              thumbnailUrl: "$$blog.thumbnailUrl",
-              createdAt: "$$blog.createdAt",
-              updatedAt: "$$blog.updatedAt",
-              comments: {
-                $map: {
-                  input: "$populatedComments",
-                  as: "comment",
-                  in: {
-                    _id: "$$comment._id",
-                    text: "$$comment.content", // Assuming the comment has a `content` field
-                    user: "$$comment.user", // The comment's author user ID
-                    createdAt: "$$comment.createdAt", // Assuming there's a createdAt field in the comment
-                  },
-                },
-              },
-            },
-          },
+      {
+        path: "likes", // Populate likes
+        populate: {
+          path: "user",
+          select: "username",
         },
       },
-    },
-    // Lookup and populate user details for each comment's author (user)
-    {
-      $lookup: {
-        from: "users", // The collection holding the users (who authored comments)
-        localField: "populatedComments.user", // The `user` field in each populated comment
-        foreignField: "_id", // Match the user _id
-        as: "authorDetails", // This will populate user data for each comment
-      },
-    },
-    // Add user details to comments (for each comment's author)
-    {
-      $addFields: {
-        blogs: {
-          $map: {
-            input: "$blogs",
-            as: "blog",
-            in: {
-              _id: "$$blog._id",
-              title: "$$blog.title",
-              description: "$$blog.description",
-              videoUrl: "$$blog.videoUrl",
-              thumbnailUrl: "$$blog.thumbnailUrl",
-              createdAt: "$$blog.createdAt",
-              updatedAt: "$$blog.updatedAt",
-              comments: {
-                $map: {
-                  input: "$$blog.comments",
-                  as: "comment",
-                  in: {
-                    _id: "$$comment._id",
-                    text: "$$comment.text", // Assuming the comment has a `text` field
-                    user: {
-                      $arrayElemAt: [
-                        "$authorDetails", // Get the user details for this comment
-                        { $indexOfArray: ["$$blog.comments.user", "$$comment.user"] }
-                      ],
-                    },
-                    createdAt: "$$comment.createdAt", // Assuming there's a createdAt field in the comment
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    // Project only the fields you want in the final output
-    {
-      $project: {
-        _id: 1,
-        username: 1,
-        email: 1,
-        role: 1,
-        createdAt: 1,
-        updatedAt: 1,
-        blogs: 1, // The blogs now have fully populated comments and user details
-        blogCount: 1, // Include the count of blogs
-      },
-    },
-  ]);
-
+    ],
+  });
 
   // Send response with the processed data
-  return ResponseHandler.success(res, usersWithBlogData, "Featured successfully");
+  return ResponseHandler.success(
+    res,
+    usersWithBlogData,
+    "Featured successfully"
+  );
 });
 
 // @desc    Get all current user Blogs
@@ -262,25 +159,29 @@ export const getAllBlogs = asyncHandler(async (req, res) => {
   } else {
     ResponseHandler.serverError(res, "Failed to fetch blogs");
   }
-})
+});
 
 // @desc    Get single Blog
 // @route   GET /api/Blogs/:id
 // @access  Public
 export const getBlog = asyncHandler(async (req, res) => {
-  const userBlog = await Blog.findById(req.params.id).populate(
-    "user",
-    "username email",
-  ).populate({
-    path: "likes",
-  }).populate({
-    path: "comments",
-    select: "content createdAt",
-    populate: {
-      path: "user",
-      select: "username profile_picture _id createdAt ",
-    },
-  })
+  const userBlog = await Blog.findById(req.params.id)
+    .populate("user", "username email")
+    .populate({
+      path: "comments",
+      select: "content createdAt",
+      populate: {
+        path: "user",
+        select: "username profile_picture _id createdAt ",
+      },
+    })
+    .populate({
+      path: "likes",
+      // populate: {
+      //   path: "user",
+      //   select: "username profile_picture _id createdAt ",
+      // },
+    });
 
   if (!userBlog) {
     res.status(404);
@@ -322,24 +223,46 @@ export const updateBlog = asyncHandler(async (req, res) => {
 
 // @desc    Delete Blog
 // @route   DELETE /api/Blogs/:id
-// @access  Private
+// @access  Private, public
 export const deleteBlog = asyncHandler(async (req, res) => {
-  const Blog = await Blog.findById(req.params.id);
+  console.log("blog id: ", req.params.id);
+  console.log("user id: ", req.user._id);
 
-  if (!Blog) {
-    res.status(404);
-    throw new Error("Blog not found");
-  }
+  const findUser = await User.findById(req.user._id);
+  const findBlog = await Blog.findById(req.params.id);
 
-  // Check user ownership or admin
-  if (
-    Blog.user.toString() !== req.user._id.toString() &&
-    req.user.role !== "admin"
-  ) {
-    res.status(403);
-    throw new Error("Not authorized to delete this Blog");
-  }
+  // if (!findBlog) {
+  //   res.status(404);
+  //   throw new Error("Blog not found");
+  // }
 
-  await Blog.remove();
+  // if (!findUser) {
+  //   res.status(404);
+  //   throw new Error("User not found");
+  // }
+
+  // 675d11671fc3b34b7ca80311
+
+
+
+  // 2. Delete all comments related to this blog
+  await Comment.deleteMany({ blog: req.params.id }); // Same for comments' blog reference
+  console.log("All comments related to the blog have been deleted.");
+
+  // 3. Delete all likes related to this blog
+  await Like.deleteMany({ content: req.params.id }); // Same for likes' blog reference
+  console.log("All likes related to the blog have been deleted.");
+
+  // 4. Delete the blog document itself
+  await Blog.deleteOne({ _id: req.params.id });
+  console.log("Blog document has been deleted.");
+
+  // 1. Remove blog ID from the user's Blogs array
+  await User.updateOne(
+    { _id: req.user._id }, // Use 'new' to create an instance of ObjectId
+    { $pull: { Blogs: req.params.id } } // Same here for the blog ID
+  );
+  console.log("Blog ID removed from user's Blogs array.");
+
   return ResponseHandler.success(res, null, "Blog deleted successfully");
 });

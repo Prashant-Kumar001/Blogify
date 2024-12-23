@@ -7,6 +7,8 @@ import { protect, authorize } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.route("/").get(getBlogs);
-router.route("/users").get(getAllUsers);
+// Define routes
+router.get("/", protect, authorize("admin"), getBlogs); // Admin-only route to get all blogs
+router.get("/users", protect, authorize("admin"), getAllUsers); // Admin-only route to get all users
+
 export default router;
